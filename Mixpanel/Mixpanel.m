@@ -10,7 +10,6 @@
 
 #import "Mixpanel.h"
 #import "MPLogger.h"
-#import "NSData+MPBase64.h"
 #import "MPFoundation.h"
 #import "Mixpanel+AutomaticEvents.h"
 #import "AutomaticEventsConstants.h"
