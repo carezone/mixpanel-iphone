@@ -81,6 +81,46 @@
 
 @implementation MPTakeoverNotificationViewController
 
+- (UIColor *)colorWithHexString:(NSString *)string
+{
+    unsigned hex;
+
+    NSScanner *scanner = [NSScanner scannerWithString:string];
+    if (![scanner scanHexInt:&hex]) {
+        return nil;
+    }
+
+    int r = (hex >> 16) & 0xFF;
+    int g = (hex >> 8) & 0xFF;
+    int b = (hex) & 0xFF;
+    return [UIColor colorWithRed:(r/255.0) green:(g/255.0) blue:(b/255.0) alpha:1];
+}
+
+- (void)customizeOkayButton
+{
+    NSURL *URL = ((MPTakeoverNotification *)self.notification).buttons[0].ctaUrl;
+    if (URL == nil) {
+        return;
+    }
+
+    NSURLComponents *components = [NSURLComponents componentsWithURL:URL resolvingAgainstBaseURL:NO];
+    [components.queryItems enumerateObjectsUsingBlock:^(NSURLQueryItem *queryItem, NSUInteger idx, BOOL *stop) {
+
+        NSString *name = queryItem.name.lowercaseString;
+        NSString *value = queryItem.value;
+
+        if ([name isEqualToString:@"textcolor"] && value) {
+            UIColor *color = [self colorWithHexString:value];
+            [self.firstButton setTitleColor:color forState:UIControlStateNormal];
+        }
+        else if ([name isEqualToString:@"bgcolor"] && value) {
+            UIColor *color = [self colorWithHexString:value];
+            self.firstButton.backgroundColor = color;
+            self.firstButton.layer.borderColor = color.CGColor;
+        }
+    }];
+}
+
 - (instancetype)init {
     self = [super initWithNibName:[MPResources notificationXibName] bundle:[MPResources frameworkBundle]];
     
@@ -143,6 +183,12 @@
             self.viewMask.clipsToBounds = YES;
             self.viewMask.layer.cornerRadius = 6;
         }
+
+        self.titleLabel.font = [UIFont fontWithName:@"IdealSans-Medium" size:22];
+        self.bodyLabel.font = [UIFont fontWithName:@"IdealSans-Book" size:17];
+        self.firstButton.titleLabel.font = [UIFont fontWithName:@"IdealSans-Medium" size:17];
+
+        [self customizeOkayButton];
     }
 }
 
